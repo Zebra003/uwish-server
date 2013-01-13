@@ -23,7 +23,6 @@ app.configure(function() {
 
 
 app.get('/', function(request, response) {
-
   mongo.Db.connect(mongoUri, function (err, db) {
     db.collection('mydocs', function(er, collection) {
       collection.insert({'mykey': 'myvalue'}, {safe: true}, function(er,rs) {
@@ -33,9 +32,16 @@ app.get('/', function(request, response) {
   });
 });
 
+var wishes = [];
 app.post('/:uuid/wishes', function(req, res) {
-  console.log('got POST to wishes');
+  var wish = req.body;
+  wishes.push(wish);
   res.send({ success: true });
+});
+
+app.get('/:uuid/wishes', function(req, res) {
+  console.log(wishes);
+  res.send(wishes);
 });
 
 
