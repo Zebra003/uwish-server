@@ -32,6 +32,7 @@ mongo.Db.connect(mongoUri, function(err, db) {
 
     app.get('/:user/wishes', function(req, res) {
       collection.find({ user: req.params.user }).toArray(function(err, user) {
+        if (err || !user) res.send([]);
         res.send(user[0].wishes);
       });
     });
