@@ -18,6 +18,7 @@ var app = express.createServer(express.logger());
 
 app.configure(function() {
   app.use(express.bodyParser());
+  app.use(express.methodOverride());
   app.use(allowCrossDomain);
 });
 
@@ -44,6 +45,10 @@ app.get('/:uuid/wishes', function(req, res) {
   res.send(wishes);
 });
 
+app.delete('/:uuid/wishes/:id', function(req, res) {
+  wishes.splice(req.params.id, 1)
+  res.send({ success: true });
+});
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {
