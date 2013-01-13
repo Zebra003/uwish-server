@@ -2,7 +2,7 @@ var express = require('express');
 
 var mongo = require('mongodb');
 var mongoUri = process.env.MONGOLAB_URI ||
-  'mongodb://localhost/mydb';
+  'mongodb://localhost/uwish';
 
 // CORS middleware
 var allowCrossDomain = function(req, res, next) {
@@ -23,40 +23,48 @@ app.configure(function() {
 });
 
 
-app.get('/', function(request, response) {
-  mongo.Db.connect(mongoUri, function (err, db) {
-    db.collection('mydocs', function(er, collection) {
-      collection.insert({'mykey': 'myvalue'}, {safe: true}, function(er,rs) {
-        response.send("IT WORKS....I think")
+mongo.Db.connect(mongoUri, function(err, db) {
+  db.collection('wishes', function(err, collection) {
+
+    app.get('/', function(req, res) {
+      res.send('Welcome to the server.');
+    });
+
+    app.get('/:user/wishes', function(req, res) {
+      collection.find({ user: req.params.user }).toArray(function(err, user) {
+        res.send(user[0].wishes);
       });
     });
+
+    app.post('/:user/wishes', function(req, res) {
+      var wish = req.body;
+      collection.update({ user: req.params.user }, { $push: { wishes: wish } }, { upsert: true }, function(err) {
+        res.send({ success: true });
+      });
+    });
+
+    app.put('/:user/wishes/:id', function(req, res) {
+      var modification = {};
+      modification['wishes.' + req.params.id + '.image'] = req.body.image;
+      collection.update({ user: req.params.user }, { $set: modification }, { upsert: true }, function(err) {
+        res.send({ success: true });
+      });
+
+    });
+
+    app.delete('/:user/wishes/:id', function(req, res) {
+      var modification = {};
+      modification['wishes.' + req.params.id] = 1;
+      collection.update({ user: req.params.user }, { $unset: modification }, function(err) {
+        collection.update({ user: req.params.user }, { $pull: { wishes: null } }, function(err) {
+          res.send({ success: true });
+        });
+      });
+    });
+
+    var port = process.env.PORT || 5000;
+    app.listen(port, function() {
+      console.log("Listening on " + port);
+    });
   });
-});
-
-var wishes = [];
-
-app.get('/:uuid/wishes', function(req, res) {
-  console.log(wishes);
-  res.send(wishes);
-});
-
-app.post('/:uuid/wishes', function(req, res) {
-  var wish = req.body;
-  wishes.push(wish);
-  res.send({ success: true });
-});
-
-app.put('/:uuid/wishes/:id', function(req, res) {
-  wishes[req.params.id].image = req.body.image;
-  res.send({ success: true });
-});
-
-app.delete('/:uuid/wishes/:id', function(req, res) {
-  wishes.splice(req.params.id, 1)
-  res.send({ success: true });
-});
-
-var port = process.env.PORT || 5000;
-app.listen(port, function() {
-  console.log("Listening on " + port);
 });
