@@ -34,15 +34,21 @@ app.get('/', function(request, response) {
 });
 
 var wishes = [];
+
+app.get('/:uuid/wishes', function(req, res) {
+  console.log(wishes);
+  res.send(wishes);
+});
+
 app.post('/:uuid/wishes', function(req, res) {
   var wish = req.body;
   wishes.push(wish);
   res.send({ success: true });
 });
 
-app.get('/:uuid/wishes', function(req, res) {
-  console.log(wishes);
-  res.send(wishes);
+app.put('/:uuid/wishes/:id', function(req, res) {
+  wishes[req.params.id].image = req.body.image;
+  res.send({ success: true });
 });
 
 app.delete('/:uuid/wishes/:id', function(req, res) {
