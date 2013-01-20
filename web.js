@@ -36,7 +36,7 @@ mongo.Db.connect(mongoUri, function(err, db) {
       res.header('Cache-Control', 'no-cache');
       collection.find({ user: req.params.user }).toArray(function(err, user) {
         if (err) throw err;
-        if (!user) res.send([]);
+        if (!user || !user[0]) return res.send([]);
         res.send(user[0].wishes);
       });
     });
