@@ -41,6 +41,7 @@ mongo.Db.connect(mongoUri, function(err, db) {
     });
 
     app.post('/:user/wishes', function(req, res) {
+      res.header('Cache-Control', 'no-cache');
       var wish = req.body;
       collection.update({ user: req.params.user }, { $push: { wishes: wish } }, { upsert: true }, function(err) {
         if (err) throw err;
@@ -49,23 +50,24 @@ mongo.Db.connect(mongoUri, function(err, db) {
     });
 
     app.put('/:user/wishes/:id', function(req, res) {
+      res.header('Cache-Control', 'no-cache');
       var modification = {};
       modification['wishes.' + req.params.id + '.image'] = req.body.image;
       collection.update({ user: req.params.user }, { $set: modification }, { upsert: true }, function(err) {
         if (err) throw err;
         res.send({ success: true });
       });
-
     });
 
     app.delete('/:user/wishes/:id', function(req, res) {
+      res.header('Cache-Control', 'no-cache');
       var modification = {};
       modification['wishes.' + req.params.id] = 1;
       collection.update({ user: req.params.user }, { $unset: modification }, function(err) {
         if (err) throw err;
         collection.update({ user: req.params.user }, { $pull: { wishes: null } }, function(err) {
           if (err) throw err;
-          res.send({ success: true });
+          res.send({ success: 'more true' });
         });
       });
     });
