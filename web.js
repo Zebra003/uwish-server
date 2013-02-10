@@ -60,16 +60,11 @@ mongo.Db.connect(mongoUri, function(err, db) {
       });
     });
 
-    app.delete('/:user/wishes/:id', function(req, res) {
+    app.delete('/:user/wishes/:guid', function(req, res) {
       res.header('Cache-Control', 'no-cache');
-      var modification = {};
-      modification['wishes.' + req.params.id] = 1;
-      collection.update({ user: req.params.user }, { $unset: modification }, function(err) {
+      collection.update({ user: req.params.user }, { $pull: { wishes: { guid: req.params.guid } } }, function(err) {
         if (err) throw err;
-        collection.update({ user: req.params.user }, { $pull: { wishes: null } }, function(err) {
-          if (err) throw err;
-          res.send({ success: 'more true' });
-        });
+        res.send({ success: true });
       });
     });
 
