@@ -12,8 +12,6 @@ var allowCrossDomain = function(req, res, next) {
   next();
 }
 
-
-
 var app = express.createServer(express.logger());
 
 app.configure(function() {
@@ -22,6 +20,9 @@ app.configure(function() {
   app.use(allowCrossDomain);
 });
 
+app.configure('development', function() {
+    app.use(express.logger('dev'));
+});
 
 mongo.Db.connect(mongoUri, function(err, db) {
   if (err) throw err;
